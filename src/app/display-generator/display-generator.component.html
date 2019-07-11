@@ -1,0 +1,12 @@
+<div>
+  <p>
+    Score total : {{generator.totalScore}}
+    Score moyen : {{generator.scoreAverage}}
+  </p>
+
+  <div fxLayout="row wrap">
+    <div *ngFor="let field of generator.fields" fxFlex>
+      <app-display-field [field]="field"></app-display-field>
+    </div>
+  </div>
+</div>

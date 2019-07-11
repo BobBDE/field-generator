@@ -1,0 +1,55 @@
+<!--     Terrain     -->
+<div class="field">
+  <table>
+    <tr *ngFor="let line of field.field; let first = first; let last = last">
+
+      <!--  Gestion ligne entrée sortie -->
+      <ng-container *ngIf="first || last; else field">
+        <th *ngFor="let value of line">
+          <div [ngSwitch]="value" class="square-size">
+            <ng-container *ngSwitchCase="'entry'">
+              <img class="arrow" src="../../assets/arrow-down-c.png" alt="sortie">
+            </ng-container>
+            <ng-container *ngSwitchCase="'exit'">
+              <img class="arrow" src="../../assets/arrow-down-c.png" alt="sortie">
+            </ng-container>
+          </div>
+        </th>
+      </ng-container>
+
+      <!--   Gestion du terrain -->
+      <ng-template #field>
+        <th class="square" *ngFor="let value of line">
+          <div [ngSwitch]="value" class="square-size">
+            <ng-container *ngSwitchCase="'block'">X</ng-container>
+          </div>
+        </th>
+      </ng-template>
+    </tr>
+
+  </table>
+  <!--    Info sur le terrain    -->
+  <div>
+    Score: {{field.score}}
+  </div>
+</div>
+
+<!--  Score  -->
+<div class="field" *ngIf="displayFieldScore">
+  <table>
+    <tr *ngFor="let line of field.scoreField; let first = first; let last = last">
+      <ng-container *ngIf="first || last; else field">
+        <th *ngFor="let value of line">
+          {{value}}
+        </th>
+      </ng-container>
+
+      <ng-template #field>
+        <th class="square" *ngFor="let value of line">
+          {{value}}
+        </th>
+      </ng-template>
+
+    </tr>
+  </table>
+</div>

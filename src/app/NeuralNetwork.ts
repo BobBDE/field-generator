@@ -1,6 +1,10 @@
 import * as tf from '@tensorflow/tfjs';
 import {Helper} from './helper';
 
+// run sur le CPU
+tf.setBackend('cpu');
+
+
 export class NeuralNetwork {
 
   private model: any;
@@ -40,9 +44,10 @@ export class NeuralNetwork {
       for (let i = 0; i < weights.length; i++) {
         const tensor = weights[i];
         const shape = weights[i].shape;
+        // TODO il faut mettre en pas sync ici pour + de perf
         const values = tensor.dataSync().slice();
         for (let j = 0; j < values.length; j++) {
-          if (Helper.random(0, 1) < rate) {
+          if (Math.random() < rate) {
             const w = values[j];
             values[j] = w + Helper.random(-0.1, 0.1);
           }
@@ -62,6 +67,7 @@ export class NeuralNetwork {
       const xs = tf.tensor2d([inputs]);
       const ys = this.model.predict(xs);
       // console.log(outputs);
+      // TODO il faut mettre en pas sync ici pour + de perf
       return ys.dataSync();
     });
   }

@@ -4,47 +4,35 @@
     Welcome to Super Generator !
   </h1>
 
-
-  <div>
-
-
-    <table>
-
-      <tr *ngFor="let line of result; let first = first; let last = last">
-        <ng-container *ngIf="first || last; else field">
-          <th *ngFor="let value of line">
-            <div [ngSwitch]="value">
-              <ng-container *ngSwitchCase="'entry'">
-                <img class="arrow" src="../assets/arrow-down-c.png" alt="sortie">
-              </ng-container>
-              <ng-container *ngSwitchCase="'exit'">
-                <img class="arrow" src="../assets/arrow-down-c.png" alt="sortie">
-              </ng-container>
-            </div>
-          </th>
-        </ng-container>
-
-        <ng-template #field>
-          <th class="square" *ngFor="let value of line">
-            <div [ngSwitch]="value">
-              <ng-container *ngSwitchCase="'block'">X</ng-container>
-            </div>
-          </th>
-        </ng-template>
-
-      </tr>
-
-    </table>
-
-    <div>
-      Informations :
-      <p>Total : {{total}}</p>
+  <div *ngIf="generators">
+    <div *ngFor="let generator of generators" class="generator">
+      <app-display-generator [generator]="generator"></app-display-generator>
     </div>
   </div>
 
+  <div>
+    Informations :
+    <p>Generation : {{gaService.generationNumber}}</p>
+    <p>Best score : {{gaService.currentBestScore}}</p>
+    <p>Best index : {{gaService.currentBestIndex}}</p>
+    <p>Average : {{gaService.averageScore}}</p>
 
-  <button type="button" (click)="generateField()">
-    Générer un terrain
+  </div>
+
+  <!--  <button type="button" (click)="calculateScore()">-->
+  <!--    Calculer le score-->
+  <!--  </button>-->
+  <!--  <button type="button" (click)="generateField()">-->
+  <!--    Générer un terrain-->
+  <!--  </button>-->
+
+  <button type="button" (click)="stopPlay()">
+    <ng-container *ngIf="gaService.stop">Play</ng-container>
+    <ng-container *ngIf="!gaService.stop">Stop</ng-container>
   </button>
+
+  <!--  <button type="button" (click)="getBestField()">-->
+  <!--    Get the best-->
+  <!--  </button>-->
 
 </div>
