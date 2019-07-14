@@ -4,21 +4,35 @@
     Welcome to Super Generator !
   </h1>
 
-  <div *ngIf="generators">
-    <div *ngFor="let generator of generators" class="generator">
-      <app-display-generator [generator]="generator"></app-display-generator>
-    </div>
-  </div>
-
   <div>
-    Informations :
-    <p>Generation : {{gaService.generationNumber}}</p>
-    <p>Best score : {{gaService.currentBestScore}}</p>
-    <p>Best index : {{gaService.currentBestIndex}}</p>
-    <p>Average : {{gaService.averageScore}}</p>
-
+    Configuration
+    <app-config-generator></app-config-generator>
   </div>
 
+  <div fxLayout="row">
+    <div fxFlex="50%">
+      Informations :
+      <p>Generation : {{gaService.currentGeneration}}</p>
+      <p>Best score : {{gaService.currentBestScore}}</p>
+      <p>Best index : {{gaService.currentBestIndex}}</p>
+      <p>Average : {{gaService.currentAverageScore}}</p>
+      <p>Best score all: {{gaService.bestScore}}</p>
+
+      <button mat-button color="primary" type="button" (click)="startGeneration()"
+              [disabled]="!generationEnded && generationStarted">
+        Start generation
+      </button>
+      <button mat-button color="accent" type="button" (click)="stopPlay()">
+        <ng-container *ngIf="gaService.stop">Play</ng-container>
+        <ng-container *ngIf="!gaService.stop">Stop</ng-container>
+      </button>
+    </div>
+
+    <div fxFlex="50%">
+      <app-stat-graph></app-stat-graph>
+    </div>
+
+  </div>
   <!--  <button type="button" (click)="calculateScore()">-->
   <!--    Calculer le score-->
   <!--  </button>-->
@@ -26,13 +40,15 @@
   <!--    Générer un terrain-->
   <!--  </button>-->
 
-  <button type="button" (click)="stopPlay()">
-    <ng-container *ngIf="gaService.stop">Play</ng-container>
-    <ng-container *ngIf="!gaService.stop">Stop</ng-container>
-  </button>
 
   <!--  <button type="button" (click)="getBestField()">-->
   <!--    Get the best-->
   <!--  </button>-->
+
+  <div *ngIf="generators && generationEnded">
+        <div *ngFor="let generator of generators" class="generator">
+          <app-display-generator [generator]="generator"></app-display-generator>
+        </div>
+  </div>
 
 </div>

@@ -1,4 +1,5 @@
 import * as tf from '@tensorflow/tfjs';
+import {Tensor} from '@tensorflow/tfjs';
 import {Helper} from './helper';
 
 // run sur le CPU
@@ -7,7 +8,7 @@ tf.setBackend('cpu');
 
 export class NeuralNetwork {
 
-  private model: any;
+  private model: tf.Sequential;
   private readonly inputNodes: number;
   private readonly hiddenNodes: number;
   private readonly outputNodes: number;
@@ -65,12 +66,22 @@ export class NeuralNetwork {
   predict(inputs: number[]): number[] {
     return tf.tidy(() => {
       const xs = tf.tensor2d([inputs]);
-      const ys = this.model.predict(xs);
+      const ys: Tensor = this.model.predict(xs) as Tensor;
       // console.log(outputs);
       // TODO il faut mettre en pas sync ici pour + de perf
-      return ys.dataSync();
+      return ys.dataSync() as any;
     });
   }
+
+  // predictAsync(inputs: number[]): Observable<number[]> {
+  //     return tf.tidy(() => {
+  //       const xs = tf.tensor2d([inputs]);
+  //       const ys: Tensor = this.model.predict(xs) as Tensor;
+  //       return from(ys.array()).pipe(
+  //         map(array => array[0])
+  //       ) as any;
+  //     });
+  //   }
 
   createModel(): tf.Sequential {
     const model = tf.sequential();

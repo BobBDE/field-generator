@@ -1,4 +1,4 @@
-import {AfterViewInit, Component, OnInit} from '@angular/core';
+import {Component, OnInit} from '@angular/core';
 import {FieldGenerator} from './FieldGenerator';
 import {GeneticAlgoService} from './genetic-algo.service';
 
@@ -7,9 +7,12 @@ import {GeneticAlgoService} from './genetic-algo.service';
   templateUrl: './app.component.html',
   styleUrls: ['./app.component.scss']
 })
-export class AppComponent implements OnInit, AfterViewInit {
+export class AppComponent implements OnInit {
 
   generators: FieldGenerator[];
+
+  generationStarted = false;
+  generationEnded = false;
 
   constructor(public gaService: GeneticAlgoService) {
   }
@@ -22,7 +25,16 @@ export class AppComponent implements OnInit, AfterViewInit {
       }
     );
 
-    this.gaService.firstGeneration();
+    this.gaService.generationEnded$.subscribe(
+      () => this.generationEnded = true
+    );
+
+  }
+
+  startGeneration() {
+    this.generationStarted = true;
+    this.generationEnded = false;
+    this.gaService.startGeneration();
   }
 
 
@@ -31,14 +43,8 @@ export class AppComponent implements OnInit, AfterViewInit {
 
     // si on reprend
     if (!this.gaService.stop) {
-      this.gaService.nextGeneration();
+      this.gaService.gotToNextGeneration();
     }
-  }
-
-  getBestField() {
-  }
-
-  ngAfterViewInit(): void {
   }
 
 

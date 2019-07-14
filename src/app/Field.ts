@@ -4,13 +4,13 @@ import {Coord, Square} from './model';
 export class Field {
 
   // nombre de case du terrain en largeur
-  public width = 5;
+  public readonly width: number;
   // nombre de case du terrain en hauteur
-  public height = 5;
+  public readonly height: number;
   // position X de l'entre
-  public entryPosX = 1;
+  public readonly entryPosX: number;
   // position X de la sortie
-  public exitPosX = 3;
+  public readonly exitPosX: number;
 
   // terrain
   public field: Square[][];

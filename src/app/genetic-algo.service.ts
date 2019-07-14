@@ -1,33 +1,50 @@
 import {Injectable} from '@angular/core';
 import {FieldGenerator} from './FieldGenerator';
 import {Subject} from 'rxjs';
+import {Config} from './Config';
+
 
 @Injectable({
   providedIn: 'root'
 })
 export class GeneticAlgoService {
 
+  public populationCount: number;
+  public generationLimit: number;
+  private timeBetweenGeneration: number;
 
-  public populationCount = 50;
-  public generationNumber = 0;
-  public generationLimit = 500;
-  public currentBestScore = 100;
-  public currentBestIndex = 100;
-  public averageScore = 100;
+  // génération actuel
+  public currentGeneration = 0;
+  public currentBestScore = -1;
+  public currentBestIndex = -1;
+  public currentAverageScore = -1;
+
+  // toute generation confondu
+  // meilleur score en tout
+  public bestScore = -1;
+  public bestGeneration = -1;
+
+  // permet d'avoir le temps d'execution
+  private startTime: number;
+
 
   private generators: FieldGenerator[];
 
-  public stop = false;
+  // permet de bloquer la génération
+  public stop: boolean;
 
+  // appeler lorsqu'une nouvelle génération est prête
   public newGeneration$ = new Subject<FieldGenerator[]>();
-
+  public generationStarted$ = new Subject<void>();
+  public generationEnded$ = new Subject<void>();
 
   constructor() {
   }
 
-  public firstGeneration() {
-    this.generationNumber = 1;
-    this.generators = [];
+  public startGeneration() {
+    this.initValues();
+
+    // génération de la première génération
     for (let i = 0; i < this.populationCount; i++) {
       this.generators.push(new FieldGenerator());
     }
@@ -36,24 +53,21 @@ export class GeneticAlgoService {
 
     this.newGeneration$.next(this.generators);
 
-
-    setTimeout(() => {
-      if (!this.stop) {
-        this.nextGeneration();
-      }
-    }, 3000);
+    this.startTime = new Date().getTime();
+    this.gotToNextGeneration();
   }
 
-
-  public nextGeneration() {
-    this.generationNumber++;
-    console.log('Next génération ' + this.generationNumber);
+  private nextGeneration() {
+    this.currentGeneration++;
+    console.log('Next génération ' + this.currentGeneration);
+    // console.log(tf.memory());
 
     const newGeneration: FieldGenerator[] = [];
     for (let i = 0; i < this.populationCount; i++) {
       newGeneration.push(this.pickOne());
     }
 
+    // on clean les anciens
     for (const oldField of this.generators) {
       oldField.dispose();
     }
@@ -65,17 +79,35 @@ export class GeneticAlgoService {
 
     this.newGeneration$.next(this.generators);
 
-    // setTimeout(() => {
-    if (!this.stop && this.generationNumber < this.generationLimit) {
-      this.nextGeneration();
+    if (!this.stop && this.currentGeneration < this.generationLimit) {
+      this.gotToNextGeneration();
+    } else {
+      // si la génération est finie
+      if (!this.stop) {
+        const duration = new Date().getTime() - this.startTime;
+        console.log('Fin en ' + duration + 'ms');
+
+        this.generationEnded$.next();
+      }
     }
-    // }, 1000);
   }
+
+  public gotToNextGeneration() {
+    if (this.timeBetweenGeneration === 0) {
+      this.nextGeneration();
+    } else {
+      setTimeout(() => {
+          this.nextGeneration();
+        },
+        this.timeBetweenGeneration);
+    }
+  }
+
 
   // calcule de la fitness en fonction des autres generateurs
   private calculateFitness() {
-    this.currentBestScore = 100;
-    this.averageScore = 100;
+    this.currentBestScore = -1;
+    this.currentAverageScore = -1;
 
     // on calcule la somme de tous les score des generateurs
     let totalScore = 0;
@@ -85,7 +117,7 @@ export class GeneticAlgoService {
     for (const field of this.generators) {
       totalScore += field.totalScore;
 
-      if (field.totalScore < this.currentBestScore) {
+      if (field.totalScore > this.currentBestScore) {
         this.currentBestScore = field.totalScore;
         this.currentBestIndex = index;
       }
@@ -94,11 +126,21 @@ export class GeneticAlgoService {
     }
 
     // calcule le la moyenne
-    this.averageScore = totalScore / this.populationCount;
+    this.currentAverageScore = totalScore / this.populationCount;
 
     // calcule de la proba pour chaque génération d'être choisie
     for (const field of this.generators) {
       field.probaFitness = field.totalScore / totalScore;
+    }
+
+    // if (this.currentBestScore >= 375) {
+    //   this.stop = true;
+    //   this.generationEnded$.next();
+    // }
+
+    if (this.currentBestScore > this.bestScore) {
+      this.bestScore = this.currentBestScore;
+      this.bestGeneration = this.currentGeneration;
     }
   }
 
@@ -113,5 +155,24 @@ export class GeneticAlgoService {
     index--;
     const field = this.generators[index];
     return new FieldGenerator(field.brain, field.totalScore);
+  }
+
+  private initValues() {
+    // on prévient de la génération
+    this.generationStarted$.next();
+
+    // on récupère la config
+    this.populationCount = Config.populationCount;
+    this.generationLimit = Config.generationLimit;
+    this.timeBetweenGeneration = Config.timeBetweenGeneration;
+
+    // initialisation des variables
+    this.currentGeneration = 1;
+    this.currentBestScore = -1;
+    this.currentBestIndex = -1;
+    this.currentAverageScore = -1;
+    this.generators = [];
+
+    this.stop = false;
   }
 }

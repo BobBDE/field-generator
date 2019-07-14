@@ -1,0 +1,51 @@
+
+<mat-form-field>
+  <input matInput type="number" [(ngModel)]="populationCount"
+         placeholder="Taille de la population" min="0"
+         (change)="populationCountChange()">
+</mat-form-field>
+
+<mat-form-field>
+  <input matInput type="number" [(ngModel)]="generationLimit"
+         placeholder="Limite de génération" min="0"
+         (change)="generationLimitChange()">
+</mat-form-field>
+
+<mat-form-field>
+  <input matInput type="number" [(ngModel)]="fieldGenerationNumber"
+         placeholder="Nombre de terrain généré par générateur" min="0"
+         (change)="fieldGenerationNumberChange()">
+</mat-form-field>
+
+<mat-form-field>
+  <input matInput type="number" [(ngModel)]="fieldWidth"
+         placeholder="Largeur des terrains" min="0"
+         (change)="fieldWidthChange()">
+</mat-form-field>
+
+
+<mat-form-field>
+  <input matInput type="number" [(ngModel)]="fieldHeight"
+         placeholder="Hauteur des terrains" min="0"
+         (change)="fieldHeightChange()">
+</mat-form-field>
+
+<mat-form-field>
+  <input matInput type="number" [(ngModel)]="blockCountPerField"
+         placeholder="Nombre de block par terrain" min="0"
+         (change)="blockCountPerFieldChange()">
+</mat-form-field>
+
+<mat-form-field>
+  <input matInput type="number" [(ngModel)]="hiddenNodeCount"
+         placeholder="Nombre d'hidden node" min="0"
+         (change)="hiddenNodeCountChange()">
+</mat-form-field>
+
+<mat-form-field>
+  <input matInput type="number" [(ngModel)]="timeBetweenGeneration"
+         placeholder="Temps entre les générations en ms" min="0"
+         (change)="timeBetweenGenerationChange()">
+</mat-form-field>
+
+
