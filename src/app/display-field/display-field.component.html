@@ -1,5 +1,5 @@
 <!--     Terrain     -->
-<div class="field">
+<div class="field" [ngClass]="{'doable': field.isDoable}">
   <table>
     <tr *ngFor="let line of field.field; let first = first; let last = last">
 

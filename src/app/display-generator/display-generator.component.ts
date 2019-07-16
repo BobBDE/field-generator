@@ -9,6 +9,7 @@ import {FieldGenerator} from '../FieldGenerator';
 export class DisplayGeneratorComponent implements OnInit {
 
   @Input() generator: FieldGenerator;
+  @Input() index: number;
 
   constructor() {
   }

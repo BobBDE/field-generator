@@ -2,6 +2,7 @@ import {NeuralNetwork} from './NeuralNetwork';
 import {Square} from './model';
 import {Field} from './Field';
 import {Config} from './Config';
+import {Helper} from './helper';
 
 // classe qui permet de générer des field
 export class FieldGenerator {
@@ -65,13 +66,13 @@ export class FieldGenerator {
   // génère un terrain
   private generateField(count: number): Field {
     // générer les portes aléatoirement sans avoir les 2 sur la même ligne
-    // this.entryPosX = Helper.roundRandom(0, 5);
-    // this.exitPosX = Helper.roundRandom(0, 5);
-    // while (this.entryPosX === this.exitPosX) {
-    //   this.exitPosX = Helper.roundRandom(0, 5);
-    // }
-    this.entryPosX = Math.trunc(count / 5);
-    this.exitPosX = count % 5;
+    this.entryPosX = Helper.roundRandom(0, this.width);
+    this.exitPosX = Helper.roundRandom(0, this.width);
+    while (this.entryPosX === this.exitPosX) {
+      this.exitPosX = Helper.roundRandom(0, this.width);
+    }
+    // this.entryPosX = Math.trunc(count / this.height);
+    // this.exitPosX = count % this.width;
 
     // on crée les entrée pour le réseaux de neuronne
     const inputs: number[] = [this.width, this.height, this.blockCount, this.entryPosX, this.exitPosX];
@@ -133,7 +134,7 @@ export class FieldGenerator {
   }
 
   private convertValueToSquare(value: number): Square {
-    if (value < 0) {
+    if (value < 0.5) {
       return 'empty';
     } else {
       return 'block';

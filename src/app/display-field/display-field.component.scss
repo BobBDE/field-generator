@@ -1,6 +1,12 @@
 .field{
-  padding-left: 20px;
-  padding-right: 20px;
+  margin-left: 20px;
+  margin-right: 20px;
+  margin-bottom: 30px;
+  border: 1px transparent solid;
+}
+
+.doable{
+  border: 1px green solid;
 }
 
 

@@ -24,6 +24,9 @@ export class GeneticAlgoService {
   public bestScore = -1;
   public bestGeneration = -1;
 
+  // score maximal atteignable
+  public maxScore;
+
   // permet d'avoir le temps d'execution
   private startTime: number;
 
@@ -133,10 +136,10 @@ export class GeneticAlgoService {
       field.probaFitness = field.totalScore / totalScore;
     }
 
-    // if (this.currentBestScore >= 375) {
-    //   this.stop = true;
-    //   this.generationEnded$.next();
-    // }
+    if (this.currentBestScore >= this.maxScore) {
+      this.stop = true;
+      this.generationEnded$.next();
+    }
 
     if (this.currentBestScore > this.bestScore) {
       this.bestScore = this.currentBestScore;
@@ -165,6 +168,7 @@ export class GeneticAlgoService {
     this.populationCount = Config.populationCount;
     this.generationLimit = Config.generationLimit;
     this.timeBetweenGeneration = Config.timeBetweenGeneration;
+    this.maxScore = ((Config.fieldWidth + Config.fieldHeight) + 5) * Config.fieldGenerationNumber;
 
     // initialisation des variables
     this.currentGeneration = 1;

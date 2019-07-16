@@ -17,6 +17,7 @@
       <p>Best index : {{gaService.currentBestIndex}}</p>
       <p>Average : {{gaService.currentAverageScore}}</p>
       <p>Best score all: {{gaService.bestScore}}</p>
+      <p>Max possible score : {{gaService.maxScore}}</p>
 
       <button mat-button color="primary" type="button" (click)="startGeneration()"
               [disabled]="!generationEnded && generationStarted">
@@ -46,8 +47,8 @@
   <!--  </button>-->
 
   <div *ngIf="generators && generationEnded">
-        <div *ngFor="let generator of generators" class="generator">
-          <app-display-generator [generator]="generator"></app-display-generator>
+        <div *ngFor="let generator of generators; let i = index" class="generator">
+          <app-display-generator [generator]="generator" [index]="i"></app-display-generator>
         </div>
   </div>
 

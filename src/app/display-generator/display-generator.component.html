@@ -1,12 +1,16 @@
-<div>
-  <p>
+<mat-expansion-panel>
+  <mat-expansion-panel-header>
+    N°{{index}}
     Score total : {{generator.totalScore}}
     Score moyen : {{generator.scoreAverage}}
-  </p>
+  </mat-expansion-panel-header>
 
-  <div fxLayout="row wrap">
-    <div *ngFor="let field of generator.fields" fxFlex>
-      <app-display-field [field]="field"></app-display-field>
+  <ng-template matExpansionPanelContent>
+    <div fxLayout="row wrap">
+      <div *ngFor="let field of generator.fields" fxFlex>
+        <app-display-field [field]="field"></app-display-field>
+      </div>
     </div>
-  </div>
-</div>
+
+  </ng-template>
+</mat-expansion-panel>

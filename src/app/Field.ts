@@ -18,6 +18,9 @@ export class Field {
   // score du field
   public score = 0;
 
+  // true si le terrain est faisable
+  public isDoable = false;
+
   // détail du score par case
   public scoreField: number[][];
 
@@ -77,6 +80,7 @@ export class Field {
     if (shortestDistance === 0) {
       // on augmente le score de 5
       this.score = bigestDistance + 5;
+      this.isDoable = true;
     }
     // si la plus petit distance est égale a la distance de départ on met un score de 0
     // concretement un block a été placé devant l'entré
