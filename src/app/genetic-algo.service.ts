@@ -1,7 +1,9 @@
 import {Injectable} from '@angular/core';
-import {FieldGenerator} from './FieldGenerator';
 import {Subject} from 'rxjs';
 import {Config} from './Config';
+import {Generator} from './model';
+import {GeneratorFactory} from './GeneratorFactory';
+import {NeuralNetwork} from './NeuralNetwork';
 
 
 @Injectable({
@@ -30,14 +32,13 @@ export class GeneticAlgoService {
   // permet d'avoir le temps d'execution
   private startTime: number;
 
-
-  private generators: FieldGenerator[];
+  private generators: Generator[];
 
   // permet de bloquer la génération
   public stop: boolean;
 
   // appeler lorsqu'une nouvelle génération est prête
-  public newGeneration$ = new Subject<FieldGenerator[]>();
+  public newGeneration$ = new Subject<Generator[]>();
   public generationStarted$ = new Subject<void>();
   public generationEnded$ = new Subject<void>();
 
@@ -46,17 +47,8 @@ export class GeneticAlgoService {
 
   public startGeneration() {
     this.initValues();
-
-    // génération de la première génération
-    for (let i = 0; i < this.populationCount; i++) {
-      this.generators.push(new FieldGenerator());
-    }
-
-    this.calculateFitness();
-
-    this.newGeneration$.next(this.generators);
-
     this.startTime = new Date().getTime();
+
     this.gotToNextGeneration();
   }
 
@@ -65,23 +57,37 @@ export class GeneticAlgoService {
     console.log('Next génération ' + this.currentGeneration);
     // console.log(tf.memory());
 
-    const newGeneration: FieldGenerator[] = [];
-    for (let i = 0; i < this.populationCount; i++) {
-      newGeneration.push(this.pickOne());
+    const newGeneration: Generator[] = [];
+
+    // première génération
+    if (this.currentGeneration === 1) {
+      // génération de la première génération
+      for (let i = 0; i < this.populationCount; i++) {
+        newGeneration.push(this.createGenerator());
+      }
+    }
+    // les générations suivantes
+    else {
+      for (let i = 0; i < this.populationCount; i++) {
+        newGeneration.push(this.pickOne());
+      }
+
+      // on clean les anciens
+      for (const oldField of this.generators) {
+        oldField.dispose();
+      }
     }
 
-    // on clean les anciens
-    for (const oldField of this.generators) {
-      oldField.dispose();
-    }
-
+    // on set les générateurs
     this.generators = newGeneration;
 
     // on calcule la fitness et tout
     this.calculateFitness();
 
+    // on prévient d'une nouvelle génération
     this.newGeneration$.next(this.generators);
 
+    // passer a la génération suivante
     if (!this.stop && this.currentGeneration < this.generationLimit) {
       this.gotToNextGeneration();
     } else {
@@ -133,7 +139,7 @@ export class GeneticAlgoService {
 
     // calcule de la proba pour chaque génération d'être choisie
     for (const field of this.generators) {
-      field.probaFitness = field.totalScore / totalScore;
+      field.fitness = field.totalScore / totalScore;
     }
 
     if (this.currentBestScore >= this.maxScore) {
@@ -148,16 +154,20 @@ export class GeneticAlgoService {
   }
 
   // choisi un field au hasard en fonction de la probfitness
-  private pickOne() {
+  private pickOne(): Generator {
     let index = 0;
     let r = Math.random();
     while (r > 0) {
-      r = r - this.generators[index].probaFitness;
+      r = r - this.generators[index].fitness;
       index++;
     }
     index--;
     const field = this.generators[index];
-    return new FieldGenerator(field.brain, field.totalScore);
+    return this.createGenerator(field.brain);
+  }
+
+  private createGenerator(previousBrain?: NeuralNetwork): Generator {
+    return GeneratorFactory.createGenerator(Config.generatorMode, previousBrain);
   }
 
   private initValues() {
@@ -171,7 +181,7 @@ export class GeneticAlgoService {
     this.maxScore = ((Config.fieldWidth + Config.fieldHeight) + 5) * Config.fieldGenerationNumber;
 
     // initialisation des variables
-    this.currentGeneration = 1;
+    this.currentGeneration = 0;
     this.currentBestScore = -1;
     this.currentBestIndex = -1;
     this.currentAverageScore = -1;

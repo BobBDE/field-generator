@@ -93,7 +93,7 @@ export class NeuralNetwork {
     model.add(hidden);
     const output = tf.layers.dense({
       units: this.outputNodes,
-      activation: 'linear'
+      activation: 'sigmoid'
     });
     model.add(output);
     return model;

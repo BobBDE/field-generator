@@ -1,11 +1,11 @@
+import {Coord, Generator, Square} from './model';
 import {NeuralNetwork} from './NeuralNetwork';
-import {Generator, Square} from './model';
 import {Field} from './Field';
 import {Config} from './Config';
 import {Helper} from './helper';
 
-// classe qui permet de générer des field
-export class FieldGenerator implements Generator {
+
+export class BlockGenerator implements Generator {
   // nombre de terrain qui sont généré par FieldGenerator
   private readonly generateNumber: number;
   // nombre de case du terrain en largeur
@@ -20,19 +20,11 @@ export class FieldGenerator implements Generator {
   // position X de la sortie
   private exitPosX: number;
 
-
-  // réseaux de neuronne
-  public brain: NeuralNetwork;
-  // terrain
-  public fields: Field[] = [];
-
-  // score du field
-  public totalScore = 0;
-  // moyenne des score
-  public averageScore = 0;
-  // fitness en probabilité
-  public fitness;
-
+  averageScore = 0;
+  brain: NeuralNetwork;
+  fields: Field[] = [];
+  fitness: number;
+  totalScore = 0;
 
   constructor(brain ?: NeuralNetwork) {
     this.generateNumber = Config.fieldGenerationNumber;
@@ -42,10 +34,9 @@ export class FieldGenerator implements Generator {
 
     if (brain != null) {
       this.brain = brain.copy();
-
       this.mutate();
     } else {
-      this.brain = new NeuralNetwork(5, Config.hiddenNodeCount, (this.width * this.height) - 2);
+      this.brain = new NeuralNetwork(5, Config.hiddenNodeCount, this.blockCount);
     }
 
     this.generateFields();
@@ -64,13 +55,13 @@ export class FieldGenerator implements Generator {
   // génère un terrain
   private generateField(count: number): Field {
     // générer les portes aléatoirement sans avoir les 2 sur la même ligne
-    this.entryPosX = Helper.roundRandom(0, this.width);
-    this.exitPosX = Helper.roundRandom(0, this.width);
-    while (this.entryPosX === this.exitPosX) {
-      this.exitPosX = Helper.roundRandom(0, this.width);
-    }
-    // this.entryPosX = Math.trunc(count / this.height);
-    // this.exitPosX = count % this.width;
+    // this.entryPosX = Helper.roundRandom(0, this.width);
+    // this.exitPosX = Helper.roundRandom(0, this.width);
+    // while (this.entryPosX === this.exitPosX) {
+    //   this.exitPosX = Helper.roundRandom(0, this.width);
+    // }
+    this.entryPosX = Math.trunc(count / this.height);
+    this.exitPosX = count % this.width;
 
     // on crée les entrée pour le réseaux de neuronne
     const inputs: number[] = [this.width, this.height, this.blockCount, this.entryPosX, this.exitPosX];
@@ -91,23 +82,39 @@ export class FieldGenerator implements Generator {
     return newField;
   }
 
-
   // converti la prediction en un tableau de tableau
   private convertPrediction(predictions: number[]): Square[][] {
     predictions = Array.from(predictions);
+    // console.log(predictions)
 
     // on ajoute automatiquement les non block devant les entrées sorties
-    predictions.splice(this.entryPosX, 0, -2);
-    const beforeExitPost = ((this.height - 1) * this.width) + this.exitPosX;
-    predictions.splice(beforeExitPost, 0, -2);
+    // predictions.splice(this.entryPosX, 0, -2);
+    // const beforeExitPost = ((this.height - 1) * this.width) + this.exitPosX;
+    // predictions.splice(beforeExitPost, 0, -2);
 
-    const convertedPrediction: Square[][] = [];
+    const convertedPrediction: Square[][] = this.initField();
+
+
+    for (const prediction of predictions) {
+      const coord: Coord = this.convertBlockPosition(prediction);
+      if (coord !== null) {
+        // on met un block a la valeur données
+        convertedPrediction[coord.y + 1][coord.x] = 'block';
+      }
+    }
+
+    return convertedPrediction;
+  }
+
+  // on initialise la ligne de l'entrée et la ligne de sortie et tout le reste à vide
+  private initField(): Square[][] {
+    const field: Square[][] = [];
 
     // on ajoute la ligne pour l'entrée
     const entryLine = Array(this.width).fill('outside');
     // on ajoute l'entrée
     entryLine[this.entryPosX] = 'entry';
-    convertedPrediction.push(entryLine);
+    field.push(entryLine);
 
 
     // on ajoute ligne par ligne
@@ -115,37 +122,47 @@ export class FieldGenerator implements Generator {
 
       const line: Square[] = [];
       for (let j = 0; j < this.width; j++) {
-        const value: number = predictions[(i * this.height) + j];
-        line.push(this.convertValueToSquare(value));
+        line.push('empty');
       }
 
-      convertedPrediction.push(line);
+      field.push(line);
     }
 
     // on ajoute la ligne pour la sortie
     const exitLine: Square[] = Array(this.width).fill('outside');
     // on ajoute l'entrée
     exitLine[this.exitPosX] = 'exit';
-    convertedPrediction.push(exitLine);
+    field.push(exitLine);
 
-    return convertedPrediction;
+    return field;
   }
 
-  private convertValueToSquare(value: number): Square {
-    if (value < 0.5) {
-      return 'empty';
-    } else {
-      return 'block';
+  // converti la position des block
+  private convertBlockPosition(value: number): Coord {
+    // on passe la valeur entre 0 et 2
+    let convertValue = value;
+
+    if (convertValue < 0 || convertValue > 2) {
+      console.error('Value pas cool');
+      return null;
     }
+
+    // convertir la valeur entre 0 et 2 vers une valeur entre 0 et 24 compris
+    convertValue = Math.trunc(convertValue * this.width * this.height);
+
+    // converti ça en coordonnée
+    return {
+      x: convertValue % this.width,
+      y: Math.trunc(convertValue / this.height)
+    };
   }
 
-  public dispose() {
+  dispose() {
     this.brain.dispose();
   }
 
   public mutate() {
     this.brain.mutate(0.2);
   }
-
 
 }

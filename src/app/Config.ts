@@ -1,6 +1,8 @@
 
 
 // liste des configs
+import {GeneratorMode} from './model';
+
 export class Config {
 
   //////////////// GENERATION //////////////////
@@ -12,6 +14,9 @@ export class Config {
 
   // temps de temporisation entre les generation
   public static timeBetweenGeneration = 0;
+
+  // type de générateur
+  public static generatorMode: GeneratorMode = 'FIELD';
 
   ////////////// FIELD GENERATOR /////////////////
   // nombre de terrain qui sont généré par FieldGenerator par génération

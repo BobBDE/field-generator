@@ -1,5 +1,6 @@
 import {Component, OnInit} from '@angular/core';
 import {Config} from '../Config';
+import {GeneratorMode} from '../model';
 
 @Component({
   selector: 'app-config-generator',
@@ -12,6 +13,7 @@ export class ConfigGeneratorComponent implements OnInit {
   populationCount: number = Config.populationCount;
   generationLimit: number = Config.generationLimit;
   fieldGenerationNumber: number = Config.fieldGenerationNumber;
+  generatorMode: GeneratorMode = Config.generatorMode;
   fieldWidth: number = Config.fieldWidth;
   fieldHeight: number = Config.fieldHeight;
   blockCountPerField: number = Config.blockCountPerField;
@@ -34,6 +36,10 @@ export class ConfigGeneratorComponent implements OnInit {
 
   fieldGenerationNumberChange() {
     Config.fieldGenerationNumber = this.fieldGenerationNumber;
+  }
+
+  generatorModeChange() {
+    Config.generatorMode = this.generatorMode;
   }
 
   fieldWidthChange() {
