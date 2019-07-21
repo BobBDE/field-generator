@@ -35,21 +35,21 @@
 </div>
 
 <!--  Score  -->
-<div class="field" *ngIf="displayFieldScore">
-  <table>
-    <tr *ngFor="let line of field.scoreField; let first = first; let last = last">
-      <ng-container *ngIf="first || last; else field">
-        <th *ngFor="let value of line">
-          {{value}}
-        </th>
-      </ng-container>
+<!--<div class="field" *ngIf="displayFieldScore">-->
+<!--  <table>-->
+<!--    <tr *ngFor="let line of field.scoreField; let first = first; let last = last">-->
+<!--      <ng-container *ngIf="first || last; else field">-->
+<!--        <th *ngFor="let value of line">-->
+<!--          {{value}}-->
+<!--        </th>-->
+<!--      </ng-container>-->
 
-      <ng-template #field>
-        <th class="square" *ngFor="let value of line">
-          {{value}}
-        </th>
-      </ng-template>
+<!--      <ng-template #field>-->
+<!--        <th class="square" *ngFor="let value of line">-->
+<!--          {{value}}-->
+<!--        </th>-->
+<!--      </ng-template>-->
 
-    </tr>
-  </table>
-</div>
+<!--    </tr>-->
+<!--  </table>-->
+<!--</div>-->

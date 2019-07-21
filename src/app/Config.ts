@@ -1,8 +1,7 @@
+import {GeneratorMode} from './generator/generator.class';
 
 
 // liste des configs
-import {GeneratorMode} from './model';
-
 export class Config {
 
   //////////////// GENERATION //////////////////

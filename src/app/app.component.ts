@@ -1,6 +1,6 @@
 import {Component, OnInit} from '@angular/core';
-import {FieldGenerator} from './FieldGenerator';
 import {GeneticAlgoService} from './genetic-algo.service';
+import {Generator} from './model';
 
 @Component({
   selector: 'app-root',
@@ -9,7 +9,7 @@ import {GeneticAlgoService} from './genetic-algo.service';
 })
 export class AppComponent implements OnInit {
 
-  generators: FieldGenerator[];
+  generators: Generator[];
 
   generationStarted = false;
   generationEnded = false;

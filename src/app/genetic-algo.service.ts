@@ -1,9 +1,9 @@
 import {Injectable} from '@angular/core';
 import {Subject} from 'rxjs';
 import {Config} from './Config';
-import {Generator} from './model';
 import {GeneratorFactory} from './GeneratorFactory';
 import {NeuralNetwork} from './NeuralNetwork';
+import {AbstractGenerator} from './generator/AbstractGenerator';
 
 
 @Injectable({
@@ -32,13 +32,13 @@ export class GeneticAlgoService {
   // permet d'avoir le temps d'execution
   private startTime: number;
 
-  private generators: Generator[];
+  private generators: AbstractGenerator[];
 
   // permet de bloquer la génération
   public stop: boolean;
 
   // appeler lorsqu'une nouvelle génération est prête
-  public newGeneration$ = new Subject<Generator[]>();
+  public newGeneration$ = new Subject<AbstractGenerator[]>();
   public generationStarted$ = new Subject<void>();
   public generationEnded$ = new Subject<void>();
 
@@ -57,7 +57,7 @@ export class GeneticAlgoService {
     console.log('Next génération ' + this.currentGeneration);
     // console.log(tf.memory());
 
-    const newGeneration: Generator[] = [];
+    const newGeneration: AbstractGenerator[] = [];
 
     // première génération
     if (this.currentGeneration === 1) {
@@ -154,7 +154,7 @@ export class GeneticAlgoService {
   }
 
   // choisi un field au hasard en fonction de la probfitness
-  private pickOne(): Generator {
+  private pickOne(): AbstractGenerator {
     let index = 0;
     let r = Math.random();
     while (r > 0) {
@@ -166,7 +166,7 @@ export class GeneticAlgoService {
     return this.createGenerator(field.brain);
   }
 
-  private createGenerator(previousBrain?: NeuralNetwork): Generator {
+  private createGenerator(previousBrain?: NeuralNetwork): AbstractGenerator {
     return GeneratorFactory.createGenerator(Config.generatorMode, previousBrain);
   }
 

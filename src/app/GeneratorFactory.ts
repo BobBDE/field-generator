@@ -1,12 +1,13 @@
-import {Generator, GeneratorMode} from './model';
 import {NeuralNetwork} from './NeuralNetwork';
-import {FieldGenerator} from './FieldGenerator';
-import {BlockGenerator} from './BlockGenerator';
+import {FieldGenerator} from './generator/FieldGenerator';
+import {BlockGenerator} from './generator/BlockGenerator';
+import {AbstractGenerator} from './generator/AbstractGenerator';
+import {GeneratorMode} from './generator/generator.class';
 
 // class pour créer les générateurs
 export class GeneratorFactory {
 
-  public static createGenerator(mode: GeneratorMode, previousBrain ?: NeuralNetwork): Generator {
+  public static createGenerator(mode: GeneratorMode, previousBrain ?: NeuralNetwork): AbstractGenerator {
     switch (mode) {
       case 'FIELD':
         return new FieldGenerator(previousBrain);

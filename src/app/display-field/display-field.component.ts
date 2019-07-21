@@ -1,5 +1,5 @@
 import {Component, Input, OnInit} from '@angular/core';
-import {Field} from '../Field';
+import {AbstractField} from '../field/AbstractField';
 
 @Component({
   selector: 'app-display-field',
@@ -8,7 +8,7 @@ import {Field} from '../Field';
 })
 export class DisplayFieldComponent implements OnInit {
 
-  @Input() field: Field;
+  @Input() field: AbstractField;
   @Input() displayFieldScore = false;
 
 

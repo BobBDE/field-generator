@@ -1,59 +1,29 @@
-import {Coord, Generator, Square} from './model';
-import {NeuralNetwork} from './NeuralNetwork';
-import {Field} from './Field';
-import {Config} from './Config';
-import {Helper} from './helper';
+import {Coord, Square} from '../model';
+import {NeuralNetwork} from '../NeuralNetwork';
+import {Field} from '../field/Field';
+import {Config} from '../Config';
+import {AbstractGenerator} from './AbstractGenerator';
 
 
-export class BlockGenerator implements Generator {
-  // nombre de terrain qui sont généré par FieldGenerator
-  private readonly generateNumber: number;
-  // nombre de case du terrain en largeur
-  private readonly width: number;
-  // nombre de case du terrain en hauteur
-  private readonly height: number;
-  // nombre de block a mettre sur le terrain
-  private readonly blockCount: number;
-
-  // position X de l'entre
-  private entryPosX: number;
-  // position X de la sortie
-  private exitPosX: number;
-
-  averageScore = 0;
-  brain: NeuralNetwork;
-  fields: Field[] = [];
-  fitness: number;
-  totalScore = 0;
+export class BlockGenerator extends AbstractGenerator {
 
   constructor(brain ?: NeuralNetwork) {
-    this.generateNumber = Config.fieldGenerationNumber;
-    this.width = Config.fieldWidth;
-    this.height = Config.fieldHeight;
-    this.blockCount = Config.blockCountPerField;
+    super();
 
+    // on construit le cerveau
     if (brain != null) {
       this.brain = brain.copy();
       this.mutate();
     } else {
-      this.brain = new NeuralNetwork(5, Config.hiddenNodeCount, this.blockCount);
+      this.brain = new NeuralNetwork(3, Config.hiddenNodeCount, this.blockCount);
     }
 
     this.generateFields();
   }
 
-  // génère X fields
-  private generateFields() {
-    for (let i = 0; i < this.generateNumber; i++) {
-      this.fields.push(this.generateField(i));
-    }
-
-    // calcule de la moyenne
-    this.averageScore = this.totalScore / this.generateNumber;
-  }
 
   // génère un terrain
-  private generateField(count: number): Field {
+  protected generateField(count: number): Field {
     // générer les portes aléatoirement sans avoir les 2 sur la même ligne
     // this.entryPosX = Helper.roundRandom(0, this.width);
     // this.exitPosX = Helper.roundRandom(0, this.width);
@@ -61,10 +31,10 @@ export class BlockGenerator implements Generator {
     //   this.exitPosX = Helper.roundRandom(0, this.width);
     // }
     this.entryPosX = Math.trunc(count / this.height);
-    this.exitPosX = count % this.width;
+    // this.exitPosX = count % this.width;
 
     // on crée les entrée pour le réseaux de neuronne
-    const inputs: number[] = [this.width, this.height, this.blockCount, this.entryPosX, this.exitPosX];
+    const inputs: number[] = [this.width, this.height, this.entryPosX];
 
     // on génère les output du réseaux
     const result = this.brain.predict(inputs);
@@ -95,11 +65,18 @@ export class BlockGenerator implements Generator {
     const convertedPrediction: Square[][] = this.initField();
 
 
-    for (const prediction of predictions) {
-      const coord: Coord = this.convertBlockPosition(prediction);
-      if (coord !== null) {
-        // on met un block a la valeur données
-        convertedPrediction[coord.y + 1][coord.x] = 'block';
+    for (let i = 0; i < predictions.length; i++) {
+      if (i < predictions.length - 1) {
+        const coord: Coord = this.convertBlockPosition(predictions[i]);
+        if (coord !== null) {
+          // on met un block a la valeur données
+          convertedPrediction[coord.y + 1][coord.x] = 'block';
+        }
+      }
+      // la dernière valeur est la position de la sortie
+      else {
+        this.exitPosX = this.convertExitPosition(predictions[i]);
+        convertedPrediction[convertedPrediction.length - 1][this.exitPosX] = 'exit';
       }
     }
 
@@ -131,7 +108,7 @@ export class BlockGenerator implements Generator {
     // on ajoute la ligne pour la sortie
     const exitLine: Square[] = Array(this.width).fill('outside');
     // on ajoute l'entrée
-    exitLine[this.exitPosX] = 'exit';
+    // exitLine[this.exitPosX] = 'exit';
     field.push(exitLine);
 
     return field;
@@ -157,12 +134,20 @@ export class BlockGenerator implements Generator {
     };
   }
 
-  dispose() {
-    this.brain.dispose();
-  }
+  // converti la position de la sortie
+  private convertExitPosition(value: number): number {
+    // on passe la valeur entre 0 et 2
+    let convertValue = value;
 
-  public mutate() {
-    this.brain.mutate(0.2);
+    if (convertValue < 0 || convertValue > 2) {
+      console.error('Value pas cool');
+      return null;
+    }
+
+    // convertir la valeur entre 0 et 2 vers une valeur entre 0 et la largeur compris
+    convertValue = Math.trunc(convertValue * this.width);
+
+    return convertValue;
   }
 
 }

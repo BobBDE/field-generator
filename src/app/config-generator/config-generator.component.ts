@@ -1,6 +1,6 @@
 import {Component, OnInit} from '@angular/core';
 import {Config} from '../Config';
-import {GeneratorMode} from '../model';
+import {GeneratorMode} from '../generator/generator.class';
 
 @Component({
   selector: 'app-config-generator',

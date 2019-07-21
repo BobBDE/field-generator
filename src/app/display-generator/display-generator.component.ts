@@ -1,5 +1,5 @@
 import {Component, Input, OnInit} from '@angular/core';
-import {FieldGenerator} from '../FieldGenerator';
+import {FieldGenerator} from '../generator/FieldGenerator';
 
 @Component({
   selector: 'app-display-generator',

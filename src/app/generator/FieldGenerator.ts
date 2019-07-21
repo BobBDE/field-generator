@@ -1,68 +1,28 @@
-import {NeuralNetwork} from './NeuralNetwork';
-import {Generator, Square} from './model';
-import {Field} from './Field';
-import {Config} from './Config';
-import {Helper} from './helper';
+import {NeuralNetwork} from '../NeuralNetwork';
+import {Square} from '../model';
+import {Field} from '../field/Field';
+import {Config} from '../Config';
+import {Helper} from '../helper';
+import {AbstractGenerator} from './AbstractGenerator';
 
 // classe qui permet de générer des field
-export class FieldGenerator implements Generator {
-  // nombre de terrain qui sont généré par FieldGenerator
-  private readonly generateNumber: number;
-  // nombre de case du terrain en largeur
-  private readonly width: number;
-  // nombre de case du terrain en hauteur
-  private readonly height: number;
-  // nombre de block a mettre sur le terrain
-  private readonly blockCount: number;
-
-  // position X de l'entre
-  private entryPosX: number;
-  // position X de la sortie
-  private exitPosX: number;
-
-
-  // réseaux de neuronne
-  public brain: NeuralNetwork;
-  // terrain
-  public fields: Field[] = [];
-
-  // score du field
-  public totalScore = 0;
-  // moyenne des score
-  public averageScore = 0;
-  // fitness en probabilité
-  public fitness;
-
+export class FieldGenerator extends AbstractGenerator {
 
   constructor(brain ?: NeuralNetwork) {
-    this.generateNumber = Config.fieldGenerationNumber;
-    this.width = Config.fieldWidth;
-    this.height = Config.fieldHeight;
-    this.blockCount = Config.blockCountPerField;
+    super();
 
     if (brain != null) {
       this.brain = brain.copy();
-
       this.mutate();
     } else {
       this.brain = new NeuralNetwork(5, Config.hiddenNodeCount, (this.width * this.height) - 2);
     }
-
     this.generateFields();
-  }
 
-  // génère X fields
-  private generateFields() {
-    for (let i = 0; i < this.generateNumber; i++) {
-      this.fields.push(this.generateField(i));
-    }
-
-    // calcule de la moyenne
-    this.averageScore = this.totalScore / this.generateNumber;
   }
 
   // génère un terrain
-  private generateField(count: number): Field {
+  protected generateField(count: number): Field {
     // générer les portes aléatoirement sans avoir les 2 sur la même ligne
     this.entryPosX = Helper.roundRandom(0, this.width);
     this.exitPosX = Helper.roundRandom(0, this.width);
@@ -137,14 +97,6 @@ export class FieldGenerator implements Generator {
     } else {
       return 'block';
     }
-  }
-
-  public dispose() {
-    this.brain.dispose();
-  }
-
-  public mutate() {
-    this.brain.mutate(0.2);
   }
 
 

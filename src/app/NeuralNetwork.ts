@@ -67,7 +67,6 @@ export class NeuralNetwork {
     return tf.tidy(() => {
       const xs = tf.tensor2d([inputs]);
       const ys: Tensor = this.model.predict(xs) as Tensor;
-      // console.log(outputs);
       // TODO il faut mettre en pas sync ici pour + de perf
       return ys.dataSync() as any;
     });
