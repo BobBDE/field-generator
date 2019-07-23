@@ -1,4 +1,4 @@
-import {Coord, Square} from '../model';
+import {Coord, Movement, Square} from '../model';
 
 
 export abstract class AbstractField {
@@ -20,6 +20,8 @@ export abstract class AbstractField {
   // true si le terrain est faisable
   public isDoable = false;
 
+  protected allDirections: Coord[] = [{x: 0, y: 1}, {x: 1, y: 0}, {x: -1, y: 0}, {x: 0, y: -1}];
+
   protected constructor(width: number, height: number, entryPosX: number, exitPosX: number,
                         data: Square[][]) {
     this.width = width;
@@ -28,15 +30,13 @@ export abstract class AbstractField {
     this.exitPosX = exitPosX;
 
     this.field = data;
-
-    this.calculateScore();
   }
 
   abstract calculateScore();
 
   // renvoie la nouvelle position pour un déplacement dans une direction
   // peut être la même case que le départ si le déplacement est impossible
-  protected moveToDirection(position: Coord, direction: Coord): Coord {
+  protected moveToDirection(position: Coord, direction: Coord): Movement {
     // on créer une copie de l'objet pour par modifier l'original
     const newPosition = {
       x: position.x,
@@ -63,7 +63,12 @@ export abstract class AbstractField {
       nextPosition.y += direction.y;
     }
 
-    return newPosition;
+    return {
+      startPos: position,
+      direction,
+      endPos: newPosition,
+      blockPos: nextPosition,
+    };
   }
 
 
@@ -72,7 +77,7 @@ export abstract class AbstractField {
     return Math.abs(position.x - this.exitPosX) + Math.abs(position.y - (this.height + 1));
   }
 
-  
+
   // compte le nombre de block
   protected countBlockInField(): number {
     let count = 0;
@@ -84,5 +89,53 @@ export abstract class AbstractField {
       }
     }
     return count;
+  }
+
+  public getSquare(coord: Coord): Square {
+    // si les coordonnées dépasse le field, on renvoi outside
+    if (coord.x < 0 || coord.x >= this.width ||
+      coord.y < 0 || coord.y >= this.field.length) {
+      return 'outside';
+    } else {
+      return this.field[coord.y][coord.x];
+    }
+  }
+
+
+  public displaySquare(y: number, x: number): string {
+    const square: Square = this.field[y][x];
+    if (square === 'block') {
+      return 'X';
+    } else {
+      return '';
+    }
+  }
+
+  public logInformation() {
+    this.logField();
+  }
+
+  protected logField() {
+    const xField: string[][] = [];
+    for (const line of this.field) {
+      const newLine: string[] = [];
+      for (const square of line) {
+        switch (square) {
+          case 'empty':
+            newLine.push('');
+            break;
+          case 'exit':
+          case 'entry':
+            newLine.push('E');
+            break;
+          default:
+            newLine.push('X');
+            break;
+        }
+      }
+      xField.push(newLine);
+    }
+
+    console.table(xField);
   }
 }

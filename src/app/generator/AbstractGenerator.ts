@@ -2,6 +2,7 @@
 import {NeuralNetwork} from '../NeuralNetwork';
 import {AbstractField} from '../field/AbstractField';
 import {Config} from '../Config';
+import {Square} from '../model';
 
 export abstract class AbstractGenerator {
   // nombre de terrain qui sont généré par FieldGenerator
@@ -32,7 +33,7 @@ export abstract class AbstractGenerator {
   public fitness;
 
   // génère un terrain
-  protected abstract generateField(count: number);
+  protected abstract generateField(count: number): AbstractField;
 
   protected constructor() {
     this.generateNumber = Config.fieldGenerationNumber;
@@ -58,6 +59,41 @@ export abstract class AbstractGenerator {
 
   public mutate() {
     this.brain.mutate(0.2);
+  }
+
+  // on initialise la ligne de l'entrée et la ligne de sortie et tout le reste à vide
+  protected initField(): Square[][] {
+    const field: Square[][] = [];
+
+    // on ajoute la ligne pour l'entrée
+    const entryLine = Array(this.width).fill('outside');
+    // on ajoute l'entrée
+    if (this.entryPosX != null) {
+      entryLine[this.entryPosX] = 'entry';
+    }
+    field.push(entryLine);
+
+
+    // on ajoute ligne par ligne
+    for (let i = 0; i < this.height; i++) {
+
+      const line: Square[] = [];
+      for (let j = 0; j < this.width; j++) {
+        line.push('empty');
+      }
+
+      field.push(line);
+    }
+
+    // on ajoute la ligne pour la sortie
+    const exitLine: Square[] = Array(this.width).fill('outside');
+    // on ajoute l'entrée
+    if (this.exitPosX != null) {
+      exitLine[this.exitPosX] = 'exit';
+    }
+    field.push(exitLine);
+
+    return field;
   }
 }
 

@@ -9,7 +9,7 @@ import {StatGraphComponent} from './stat-graph/stat-graph.component';
 import {LineChartModule} from '@swimlane/ngx-charts';
 import {BrowserAnimationsModule} from '@angular/platform-browser/animations';
 import {ConfigGeneratorComponent} from './config-generator/config-generator.component';
-import {MatButtonModule, MatExpansionModule, MatInputModule, MatSelectModule} from '@angular/material';
+import {MatButtonModule, MatExpansionModule, MatIconModule, MatInputModule, MatSelectModule} from '@angular/material';
 import {FormsModule} from '@angular/forms';
 
 @NgModule({
@@ -32,8 +32,10 @@ import {FormsModule} from '@angular/forms';
     MatButtonModule,
     MatExpansionModule,
     MatSelectModule,
+    MatIconModule,
 
     LineChartModule,
+    MatIconModule,
   ],
   providers: [],
   bootstrap: [AppComponent]

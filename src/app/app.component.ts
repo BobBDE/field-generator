@@ -1,6 +1,6 @@
 import {Component, OnInit} from '@angular/core';
 import {GeneticAlgoService} from './genetic-algo.service';
-import {Generator} from './model';
+import {AbstractGenerator} from './generator/AbstractGenerator';
 
 @Component({
   selector: 'app-root',
@@ -9,7 +9,7 @@ import {Generator} from './model';
 })
 export class AppComponent implements OnInit {
 
-  generators: Generator[];
+  generators: AbstractGenerator[];
 
   generationStarted = false;
   generationEnded = false;

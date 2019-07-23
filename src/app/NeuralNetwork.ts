@@ -64,6 +64,7 @@ export class NeuralNetwork {
   }
 
   predict(inputs: number[]): number[] {
+
     return tf.tidy(() => {
       const xs = tf.tensor2d([inputs]);
       const ys: Tensor = this.model.predict(xs) as Tensor;

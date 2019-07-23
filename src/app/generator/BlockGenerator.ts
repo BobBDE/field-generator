@@ -1,11 +1,14 @@
-import {Coord, Square} from '../model';
+import {BlockGeneratorPrediction, Coord, Square} from '../model';
 import {NeuralNetwork} from '../NeuralNetwork';
-import {Field} from '../field/Field';
 import {Config} from '../Config';
 import {AbstractGenerator} from './AbstractGenerator';
+import {BlockField} from '../field/BlockField';
+import {AbstractField} from '../field/AbstractField';
 
 
 export class BlockGenerator extends AbstractGenerator {
+
+  private readonly maxSize: number = 20;
 
   constructor(brain ?: NeuralNetwork) {
     super();
@@ -23,7 +26,7 @@ export class BlockGenerator extends AbstractGenerator {
 
 
   // génère un terrain
-  protected generateField(count: number): Field {
+  protected generateField(count: number): AbstractField {
     // générer les portes aléatoirement sans avoir les 2 sur la même ligne
     // this.entryPosX = Helper.roundRandom(0, this.width);
     // this.exitPosX = Helper.roundRandom(0, this.width);
@@ -34,16 +37,23 @@ export class BlockGenerator extends AbstractGenerator {
     // this.exitPosX = count % this.width;
 
     // on crée les entrée pour le réseaux de neuronne
-    const inputs: number[] = [this.width, this.height, this.entryPosX];
+    const inputs: number[] = [this.width / this.maxSize, this.height / this.maxSize, this.entryPosX / this.width];
 
     // on génère les output du réseaux
     const result = this.brain.predict(inputs);
 
-    // on les converti en données Square
-    const data: Square[][] = this.convertPrediction(result);
+    // on les converti en position de block et de sortie
+    const predictions: BlockGeneratorPrediction = this.convertPredictionToCoords(result);
+    this.exitPosX = predictions.exitCoord.x;
+
+    // on génère le field
+    const field: Square[][] = this.generateSquare(predictions);
 
     // on génère un terrain
-    const newField = new Field(this.width, this.height, this.entryPosX, this.exitPosX, data);
+    const newField = new BlockField(this.width, this.height, this.entryPosX, this.exitPosX, field, predictions);
+    newField.calculateScore();
+
+
 
     // calcule directement le score pour cette génération de terrain
     // on l'ajoute au score actuel
@@ -53,65 +63,28 @@ export class BlockGenerator extends AbstractGenerator {
   }
 
   // converti la prediction en un tableau de tableau
-  private convertPrediction(predictions: number[]): Square[][] {
+  private convertPredictionToCoords(predictions: number[]): BlockGeneratorPrediction {
     predictions = Array.from(predictions);
-    // console.log(predictions)
 
-    // on ajoute automatiquement les non block devant les entrées sorties
-    // predictions.splice(this.entryPosX, 0, -2);
-    // const beforeExitPost = ((this.height - 1) * this.width) + this.exitPosX;
-    // predictions.splice(beforeExitPost, 0, -2);
-
-    const convertedPrediction: Square[][] = this.initField();
-
+    const convertedPredictions: BlockGeneratorPrediction = {
+      blocksCoord: [],
+      exitCoord: null
+    };
 
     for (let i = 0; i < predictions.length; i++) {
       if (i < predictions.length - 1) {
-        const coord: Coord = this.convertBlockPosition(predictions[i]);
-        if (coord !== null) {
-          // on met un block a la valeur données
-          convertedPrediction[coord.y + 1][coord.x] = 'block';
-        }
+        convertedPredictions.blocksCoord.push(this.convertBlockPosition(predictions[i]));
       }
       // la dernière valeur est la position de la sortie
       else {
-        this.exitPosX = this.convertExitPosition(predictions[i]);
-        convertedPrediction[convertedPrediction.length - 1][this.exitPosX] = 'exit';
+        convertedPredictions.exitCoord = {
+          x: this.convertExitPosition(predictions[i]),
+          y: this.height - 1
+        };
       }
     }
 
-    return convertedPrediction;
-  }
-
-  // on initialise la ligne de l'entrée et la ligne de sortie et tout le reste à vide
-  private initField(): Square[][] {
-    const field: Square[][] = [];
-
-    // on ajoute la ligne pour l'entrée
-    const entryLine = Array(this.width).fill('outside');
-    // on ajoute l'entrée
-    entryLine[this.entryPosX] = 'entry';
-    field.push(entryLine);
-
-
-    // on ajoute ligne par ligne
-    for (let i = 0; i < this.height; i++) {
-
-      const line: Square[] = [];
-      for (let j = 0; j < this.width; j++) {
-        line.push('empty');
-      }
-
-      field.push(line);
-    }
-
-    // on ajoute la ligne pour la sortie
-    const exitLine: Square[] = Array(this.width).fill('outside');
-    // on ajoute l'entrée
-    // exitLine[this.exitPosX] = 'exit';
-    field.push(exitLine);
-
-    return field;
+    return convertedPredictions;
   }
 
   // converti la position des block
@@ -150,4 +123,14 @@ export class BlockGenerator extends AbstractGenerator {
     return convertValue;
   }
 
+  private generateSquare(prediction: BlockGeneratorPrediction): Square[][] {
+
+    const field: Square[][] = this.initField();
+
+    // on ajoute les block
+    for (const blockCoord of prediction.blocksCoord) {
+      field[blockCoord.y][blockCoord.x] = 'block';
+    }
+    return field;
+  }
 }

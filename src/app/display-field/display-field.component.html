@@ -1,10 +1,10 @@
 <!--     Terrain     -->
 <div class="field" [ngClass]="{'doable': field.isDoable}">
   <table>
-    <tr *ngFor="let line of field.field; let first = first; let last = last">
+    <tr *ngFor="let line of field.field; let first = first; let last = last; let y = index">
 
       <!--  Gestion ligne entrée sortie -->
-      <ng-container *ngIf="first || last; else field">
+      <ng-container *ngIf="first || last; else noEntryLine">
         <th *ngFor="let value of line">
           <div [ngSwitch]="value" class="square-size">
             <ng-container *ngSwitchCase="'entry'">
@@ -18,10 +18,10 @@
       </ng-container>
 
       <!--   Gestion du terrain -->
-      <ng-template #field>
-        <th class="square" *ngFor="let value of line">
+      <ng-template #noEntryLine>
+        <th class="square" *ngFor="let value of line; let x = index">
           <div [ngSwitch]="value" class="square-size">
-            <ng-container *ngSwitchCase="'block'">X</ng-container>
+            {{field.displaySquare(y, x)}}
           </div>
         </th>
       </ng-template>
@@ -31,6 +31,10 @@
   <!--    Info sur le terrain    -->
   <div>
     Score: {{field.score}}
+    <button mat-icon-button type="button" color="primary"
+            (click)="field.logInformation()">
+      <mat-icon>help</mat-icon>
+    </button>
   </div>
 </div>
 

@@ -142,10 +142,10 @@ export class GeneticAlgoService {
       field.fitness = field.totalScore / totalScore;
     }
 
-    if (this.currentBestScore >= this.maxScore) {
-      this.stop = true;
-      this.generationEnded$.next();
-    }
+    // if (this.currentBestScore >= this.maxScore) {
+    //   this.stop = true;
+    //   this.generationEnded$.next();
+    // }
 
     if (this.currentBestScore > this.bestScore) {
       this.bestScore = this.currentBestScore;

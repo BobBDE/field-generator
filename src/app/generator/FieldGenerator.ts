@@ -43,6 +43,7 @@ export class FieldGenerator extends AbstractGenerator {
 
     // on génère un terrain
     const newField = new Field(this.width, this.height, this.entryPosX, this.exitPosX, data);
+    newField.calculateScore();
 
     // calcule directement le score pour cette génération de terrain
     // on l'ajoute au score actuel

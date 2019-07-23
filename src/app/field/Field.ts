@@ -4,7 +4,7 @@ import {AbstractField} from './AbstractField';
 
 export class Field extends AbstractField{
   // détail du score par case
-  public scoreField: number[][];
+  private scoreField: number[][];
 
   constructor(width: number, height: number, entryPosX: number, exitPosX: number,
               data: Square[][]) {
@@ -70,7 +70,7 @@ export class Field extends AbstractField{
   // fonction recurcive pour bouger et trouve le meilleur score
   // le score le plus petit est le meilleur score
   private moveAndCheckScore(position: Coord, direction: Coord, bestDistance: number): number {
-    const newPosition = this.moveToDirection(position, direction);
+    const newPosition = this.moveToDirection(position, direction).endPos;
 
     // si c'est une case qu'on a déja visité on arrète
     if (this.scoreField[newPosition.y][newPosition.x] !== -1) {
@@ -111,12 +111,6 @@ export class Field extends AbstractField{
   }
 
   private logScoreField() {
-    for (const line of this.scoreField) {
-      console.log(line);
-    }
-  }
-
-  private logField() {
     for (const line of this.scoreField) {
       console.log(line);
     }
